@@ -1,0 +1,76 @@
+.highlight {
+    padding: var(--spacing-lg) 0;
+    background-color: var(--bg-secondary);
+}
+
+.highlight-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.highlight-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.highlight-card.right {
+    flex-direction: row-reverse;
+}
+
+.highlight-image-container {
+    flex: 1.5;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.highlight-image-container img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    transition: transform 1.5s ease;
+}
+
+.highlight-card:hover .highlight-image-container img {
+    transform: scale(1.05);
+}
+
+.highlight-text {
+    flex: 1;
+    padding: var(--spacing-md);
+}
+
+.highlight-text p {
+    font-size: 1.5rem;
+    line-height: 1.4;
+    color: var(--text-primary);
+    border-left: 2px solid var(--accent);
+    padding-left: 1.5rem;
+}
+
+.highlight-card.right .highlight-text p {
+    border-left: none;
+    border-right: 2px solid var(--accent);
+    padding-left: 0;
+    padding-right: 1.5rem;
+    text-align: right;
+}
+
+@media (max-width: 992px) {
+
+    .highlight-card,
+    .highlight-card.right {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .highlight-text p,
+    .highlight-card.right .highlight-text p {
+        font-size: 1.2rem;
+        border: none;
+        padding: 0;
+        text-align: center;
+    }
+}

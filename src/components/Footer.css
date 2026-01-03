@@ -1,0 +1,42 @@
+.footer {
+    padding: var(--spacing-lg) 0;
+    background: linear-gradient(to top, #000 0%, #0a0a0a 100%);
+    text-align: center;
+}
+
+.footer-message {
+    margin-bottom: var(--spacing-lg);
+}
+
+.footer-message p {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.highlight-text-footer {
+    color: var(--text-primary) !important;
+    font-weight: 500;
+}
+
+.footer-credits {
+    margin-top: 4rem;
+    opacity: 0.3;
+    letter-spacing: 0.2rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.login-link-footer {
+    font-size: 0.6rem;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.login-link-footer:hover {
+    opacity: 1;
+}

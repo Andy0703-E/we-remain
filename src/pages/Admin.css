@@ -1,0 +1,153 @@
+.admin-page {
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.admin-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem var(--spacing-md);
+    border-bottom: 1px solid #222;
+}
+
+.logout-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.admin-content {
+    max-width: 600px;
+    margin: 4rem auto;
+    padding: 0 var(--spacing-md);
+}
+
+.upload-section h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.upload-section p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.file-drop-zone {
+    border: 2px dashed #333;
+    border-radius: 8px;
+    padding: 4rem 2rem;
+    text-align: center;
+    position: relative;
+    transition: border-color 0.3s;
+}
+
+.file-drop-zone.has-file {
+    border-color: var(--accent);
+    border-style: solid;
+}
+
+.file-drop-zone input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-placeholder p {
+    margin-top: 1rem;
+}
+
+.file-info p {
+    margin-top: 1rem;
+    color: var(--text-primary);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.category-toggle {
+    display: flex;
+    gap: 1rem;
+}
+
+.category-toggle button {
+    flex: 1;
+    padding: 0.8rem;
+    background: #111;
+    border: 1px solid #333;
+    color: var(--text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.category-toggle button.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+}
+
+.upload-form textarea {
+    width: 100%;
+    padding: 1rem;
+    background: #111;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 4px;
+    min-height: 100px;
+    resize: vertical;
+}
+
+.submit-btn {
+    padding: 1.2rem;
+    background: var(--text-primary);
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.submit-btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.feedback-msg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.feedback-msg.success {
+    background: rgba(0, 255, 0, 0.1);
+    color: var(--accent);
+}
+
+.feedback-msg.error {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff4d4d;
+}
