@@ -1,11 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600&display=swap');
 
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #141414;
-  --text-primary: #f5f5f7;
-  --text-secondary: #a1a1a6;
-  --accent: #d4af37; /* Gold but subtle */
+  /* White Elegant Romantic Theme */
+  --bg-primary: #ffffff;
+  --bg-secondary: #fdfcfb;
+  --bg-tertiary: #fff5f5;
+  --text-primary: #2d2d2d;
+  --text-secondary: #6b6b6b;
+  --text-muted: #9a9a9a;
+  --accent: #e8b4b8;
+  /* Soft dusty rose */
+  --accent-secondary: #d4a5a5;
+  /* Mauve */
+  --accent-light: #f9e5e7;
+  /* Very light pink */
+  --border-color: #f0e6e6;
+  --border-dark: #e0d6d6;
+  --shadow-color: rgba(232, 180, 184, 0.15);
   --font-serif: 'Playfair Display', serif;
   --font-sans: 'Inter', sans-serif;
   --spacing-lg: 4rem;
@@ -29,7 +40,10 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, .serif {
+h1,
+h2,
+h3,
+.serif {
   font-family: var(--font-serif);
   font-weight: 500;
 }
@@ -48,22 +62,22 @@ img {
   display: block;
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Elegant White Theme */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: var(--border-dark);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: var(--accent-secondary);
 }
 
 .container {
@@ -78,6 +92,13 @@ img {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

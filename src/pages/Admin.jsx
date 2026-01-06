@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Upload, Image as ImageIcon, CheckCircle, AlertCircle, Trash2, X } from 'lucide-react';
+import { Upload, Image as ImageIcon, CheckCircle, AlertCircle, Trash2, X, BarChart3, Camera, Users, LogOut } from 'lucide-react';
 import { supabase } from '../supabase';
 import './Admin.css';
 
@@ -143,21 +143,81 @@ const Admin = () => {
         setDeleteModal({ show: false, photo: null });
     };
 
+    // Calculate stats
+    const totalPhotos = photos.length;
+    const studioPhotos = photos.filter(p => p.category === 'studio').length;
+    const ketemuPhotos = photos.filter(p => p.category === 'ketemu').length;
+
     return (
         <div className="admin-page">
+            {/* Modern Header */}
             <nav className="admin-nav">
-                <h1 className="serif">Admin Portal</h1>
-                <button onClick={handleLogout} className="logout-btn">Keluar</button>
+                <div className="nav-left">
+                    <BarChart3 size={28} color="var(--accent)" />
+                    <div>
+                        <h1 className="serif">Dashboard Admin</h1>
+                        <p className="nav-subtitle">We Remain - Photo Management</p>
+                    </div>
+                </div>
+                <button onClick={handleLogout} className="logout-btn">
+                    <LogOut size={18} />
+                    Keluar
+                </button>
             </nav>
 
             <main className="admin-content">
+                {/* Stats Cards */}
+                <motion.div
+                    className="stats-grid"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <div className="stat-card">
+                        <div className="stat-icon total">
+                            <ImageIcon size={24} />
+                        </div>
+                        <div className="stat-info">
+                            <h3>{totalPhotos}</h3>
+                            <p>Total Foto</p>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon studio">
+                            <Camera size={24} />
+                        </div>
+                        <div className="stat-info">
+                            <h3>{studioPhotos}</h3>
+                            <p>Foto Studio</p>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon ketemu">
+                            <Users size={24} />
+                        </div>
+                        <div className="stat-info">
+                            <h3>{ketemuPhotos}</h3>
+                            <p>Foto Ketemu</p>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Upload Section */}
                 <motion.div
                     className="upload-section"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
                 >
-                    <h2>Tambah Foto Baru</h2>
-                    <p>Bagikan momen atau hasil studio terbaru untuk website kita.</p>
+                    <div className="section-header">
+                        <div>
+                            <h2>Tambah Foto Baru</h2>
+                            <p>Bagikan momen atau hasil studio terbaru untuk website kita.</p>
+                        </div>
+                        <Upload size={32} color="var(--accent)" />
+                    </div>
 
                     <form onSubmit={handleUpload} className="upload-form">
                         <div className={`file-drop-zone ${selectedFile ? 'has-file' : ''}`}>
@@ -185,6 +245,7 @@ const Admin = () => {
                                     className={category === 'studio' ? 'active' : ''}
                                     onClick={() => setCategory('studio')}
                                 >
+                                    <Camera size={16} />
                                     Studio
                                 </button>
                                 <button
@@ -192,6 +253,7 @@ const Admin = () => {
                                     className={category === 'ketemu' ? 'active' : ''}
                                     onClick={() => setCategory('ketemu')}
                                 >
+                                    <Users size={16} />
                                     Ketemu
                                 </button>
                             </div>

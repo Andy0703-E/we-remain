@@ -1,36 +1,143 @@
 .highlight {
-    padding: var(--spacing-lg) 0;
-    background-color: var(--bg-secondary);
+    padding: calc(var(--spacing-lg) * 1.5) 0;
+    background: var(--bg-tertiary);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Central Line for Workflow Effect */
+.highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    background: linear-gradient(to bottom,
+            transparent 0%,
+            var(--border-color) 10%,
+            var(--border-color) 90%,
+            transparent 100%);
+    z-index: 0;
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 6rem;
+    position: relative;
+    background: var(--bg-tertiary);
+    /* Cover the line */
+    display: inline-block;
+    padding: 0 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.section-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-weight: 400;
 }
 
 .highlight-list {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
+    gap: 6rem;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 .highlight-card {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: 4rem;
+    position: relative;
 }
 
+/* Connecting Dot on Central Line */
+.highlight-card::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background: var(--bg-primary);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.highlight-card:hover::after {
+    background: var(--accent);
+    box-shadow: 0 0 0 6px var(--accent-light);
+}
+
+/* Zigzag Layout using nth-child */
+.highlight-card:nth-child(even) {
+    flex-direction: row-reverse;
+}
+
+/* Override existing JS logic classes in case needed, but nth-child is cleaner */
 .highlight-card.right {
     flex-direction: row-reverse;
 }
 
 .highlight-image-container {
-    flex: 1.5;
+    flex: 1;
+    max-width: 400px;
+    aspect-ratio: 4/5;
+    /* Make uniform with gallery */
+    border-radius: 12px;
     overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    position: relative;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    transition: all 0.4s ease;
+    background: var(--bg-primary);
+}
+
+/* Connector Line from Image to Center */
+.highlight-image-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 4rem;
+    /* Match gap */
+    height: 1px;
+    background: var(--border-color);
+    z-index: -1;
+}
+
+/* Adjust connector direction based on odd/even */
+.highlight-card:nth-child(odd) .highlight-image-container::before {
+    right: -4rem;
+}
+
+.highlight-card:nth-child(even) .highlight-image-container::before {
+    left: -4rem;
+}
+
+.highlight-card:hover .highlight-image-container {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(232, 180, 184, 0.25);
+    border-color: var(--accent);
 }
 
 .highlight-image-container img {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    height: 100%;
     object-fit: cover;
-    transition: transform 1.5s ease;
+    transition: transform 0.6s ease;
 }
 
 .highlight-card:hover .highlight-image-container img {
@@ -39,38 +146,85 @@
 
 .highlight-text {
     flex: 1;
-    padding: var(--spacing-md);
+    padding: 2rem;
+    background: transparent;
+    text-align: left;
 }
 
-.highlight-text p {
-    font-size: 1.5rem;
-    line-height: 1.4;
-    color: var(--text-primary);
-    border-left: 2px solid var(--accent);
-    padding-left: 1.5rem;
-}
-
-.highlight-card.right .highlight-text p {
-    border-left: none;
-    border-right: 2px solid var(--accent);
-    padding-left: 0;
-    padding-right: 1.5rem;
+.highlight-card:nth-child(even) .highlight-text {
     text-align: right;
 }
 
-@media (max-width: 992px) {
+.highlight-text p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.8;
+    font-style: italic;
+    font-family: var(--font-serif);
+}
 
-    .highlight-card,
-    .highlight-card.right {
-        flex-direction: column;
+.empty-msg {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 3rem;
+    position: relative;
+    z-index: 1;
+    opacity: 0.7;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .highlight::before {
+        left: 20px;
+    }
+
+    .section-header {
+        left: 0;
+        transform: none;
+        padding-left: 0;
+        margin-bottom: 4rem;
+        background: transparent;
+        display: block;
         text-align: center;
     }
 
-    .highlight-text p,
-    .highlight-card.right .highlight-text p {
-        font-size: 1.2rem;
-        border: none;
+    .highlight-list {
+        gap: 4rem;
+    }
+
+    .highlight-card,
+    .highlight-card:nth-child(even),
+    .highlight-card.right {
+        flex-direction: column !important;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding-left: 50px;
+    }
+
+    .highlight-card::after {
+        left: 20px;
+        top: 20%;
+    }
+
+    .highlight-image-container {
+        width: 100%;
+        max-width: 300px;
+        aspect-ratio: 4/3;
+    }
+
+    .highlight-image-container::before {
+        display: none;
+    }
+
+    .highlight-text,
+    .highlight-card:nth-child(even) .highlight-text {
         padding: 0;
-        text-align: center;
+        text-align: left !important;
     }
 }
