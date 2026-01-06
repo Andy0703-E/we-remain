@@ -10,8 +10,6 @@ const Login = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // In a real app, this should be a secure check.
-        // For this personal project, we can use a shared secret.
         if (password === '07032022') {
             localStorage.setItem('isLoggedIn', 'true');
             navigate('/admin');

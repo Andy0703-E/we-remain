@@ -151,3 +151,223 @@
     background: rgba(255, 0, 0, 0.1);
     color: #ff4d4d;
 }
+
+/* Photo Management Section */
+.photo-management {
+    margin-top: 4rem;
+    padding-top: 3rem;
+    border-top: 1px solid #222;
+}
+
+.photo-management h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.photo-management p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.loading-state {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.photo-card {
+    position: relative;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+}
+
+.photo-card:hover {
+    transform: translateY(-4px);
+    border-color: #333;
+}
+
+.photo-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.photo-info {
+    padding: 1rem;
+}
+
+.photo-category {
+    display: inline-block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    padding: 0.25rem 0.5rem;
+    background: var(--accent);
+    color: #000;
+    border-radius: 3px;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.photo-caption {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    line-height: 1.4;
+}
+
+.delete-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    padding: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s, background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-card:hover .delete-btn {
+    opacity: 1;
+}
+
+.delete-btn:hover {
+    background: #ff4d4d;
+    color: #000;
+}
+
+.empty-msg {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+    grid-column: 1 / -1;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-content {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s;
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.modal-content>p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.modal-preview {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.2s, opacity 0.3s;
+}
+
+.btn-cancel {
+    background: transparent;
+    border: 1px solid #444;
+    color: var(--text-secondary);
+}
+
+.btn-cancel:hover {
+    border-color: #666;
+}
+
+.btn-confirm {
+    background: #ff4d4d;
+    color: #fff;
+    border: none;
+}
+
+.btn-confirm:hover {
+    opacity: 0.9;
+}
+
+.modal-actions button:active {
+    transform: scale(0.98);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-content {
+        max-width: 100%;
+    }
+
+    .photo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .photo-card img {
+        height: 150px;
+    }
+}

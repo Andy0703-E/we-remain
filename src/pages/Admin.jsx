@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Upload, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, Image as ImageIcon, CheckCircle, AlertCircle, Trash2, X } from 'lucide-react';
 import { supabase } from '../supabase';
 import './Admin.css';
 
@@ -12,13 +12,33 @@ const Admin = () => {
     const [caption, setCaption] = useState('');
     const [isUploading, setIsUploading] = useState(false);
     const [status, setStatus] = useState({ type: '', message: '' });
+    const [photos, setPhotos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [deleteModal, setDeleteModal] = useState({ show: false, photo: null });
 
     useEffect(() => {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
         if (!isLoggedIn) {
             navigate('/login');
         }
+        fetchPhotos();
     }, [navigate]);
+
+    const fetchPhotos = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('photos')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setPhotos(data || []);
+        } catch (error) {
+            console.error('Error fetching photos:', error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('isLoggedIn');
@@ -69,12 +89,58 @@ const Admin = () => {
             setSelectedFile(null);
             setCaption('');
 
+            // Refresh photos list
+            fetchPhotos();
+
         } catch (error) {
             console.error('Upload error:', error);
             setStatus({ type: 'error', message: `Gagal mengunggah: ${error.message}` });
         } finally {
             setIsUploading(false);
         }
+    };
+
+    const handleDeleteClick = (photo) => {
+        setDeleteModal({ show: true, photo });
+    };
+
+    const confirmDelete = async () => {
+        const photo = deleteModal.photo;
+        if (!photo) return;
+
+        try {
+            // Extract file path from URL
+            const urlParts = photo.url.split('/');
+            const fileName = urlParts[urlParts.length - 1];
+            const filePath = `photos/${fileName}`;
+
+            // Delete from storage
+            const { error: storageError } = await supabase.storage
+                .from('kita-photos')
+                .remove([filePath]);
+
+            if (storageError) throw storageError;
+
+            // Delete from database
+            const { error: dbError } = await supabase
+                .from('photos')
+                .delete()
+                .eq('id', photo.id);
+
+            if (dbError) throw dbError;
+
+            setStatus({ type: 'success', message: 'Foto berhasil dihapus! 🗑️' });
+            fetchPhotos();
+        } catch (error) {
+            console.error('Delete error:', error);
+            setStatus({ type: 'error', message: `Gagal menghapus: ${error.message}` });
+        } finally {
+            setDeleteModal({ show: false, photo: null });
+        }
+    };
+
+    const cancelDelete = () => {
+        setDeleteModal({ show: false, photo: null });
     };
 
     return (
@@ -157,7 +223,67 @@ const Admin = () => {
                         )}
                     </form>
                 </motion.div>
+
+                <motion.div
+                    className="photo-management"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    <h2>Kelola Foto</h2>
+                    <p>Semua foto yang sudah diupload. Klik ikon hapus untuk menghapus.</p>
+
+                    {loading ? (
+                        <div className="loading-state">Memuat foto...</div>
+                    ) : (
+                        <div className="photo-grid">
+                            {photos.map((photo) => (
+                                <div key={photo.id} className="photo-card">
+                                    <img src={photo.url} alt={photo.caption || 'Photo'} />
+                                    <div className="photo-info">
+                                        <span className="photo-category">{photo.category}</span>
+                                        {photo.caption && <p className="photo-caption">{photo.caption}</p>}
+                                    </div>
+                                    <button
+                                        className="delete-btn"
+                                        onClick={() => handleDeleteClick(photo)}
+                                        title="Hapus foto"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            ))}
+                            {photos.length === 0 && (
+                                <p className="empty-msg">Belum ada foto yang diupload.</p>
+                            )}
+                        </div>
+                    )}
+                </motion.div>
             </main>
+
+            {deleteModal.show && (
+                <div className="modal-overlay" onClick={cancelDelete}>
+                    <motion.div
+                        className="modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                    >
+                        <button className="modal-close" onClick={cancelDelete}>
+                            <X size={20} />
+                        </button>
+                        <h3>Hapus Foto?</h3>
+                        <p>Foto ini akan dihapus permanen dari website dan tidak bisa dikembalikan.</p>
+                        {deleteModal.photo && (
+                            <img src={deleteModal.photo.url} alt="Preview" className="modal-preview" />
+                        )}
+                        <div className="modal-actions">
+                            <button className="btn-cancel" onClick={cancelDelete}>Batal</button>
+                            <button className="btn-confirm" onClick={confirmDelete}>Hapus</button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };
