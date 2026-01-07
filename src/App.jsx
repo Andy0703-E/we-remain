@@ -5,6 +5,7 @@ import LoadingScreen from './components/LoadingScreen'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
+import Chat from './pages/Chat'
 
 function App() {
   const [loading, setLoading] = useState(true)
@@ -30,6 +31,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/chat" element={<Chat />} />
           </Routes>
         </div>
       )}

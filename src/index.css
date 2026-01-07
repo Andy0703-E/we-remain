@@ -38,6 +38,14 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  cursor: url('/src/assets/heart-cursor.svg') 16 16, auto;
+}
+
+button,
+a,
+input[type="submit"],
+.clickable {
+  cursor: url('/src/assets/heart-cursor.svg') 16 16, pointer;
 }
 
 h1,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Upload, Image as ImageIcon, CheckCircle, AlertCircle, Trash2, X, BarChart3, Camera, Users, LogOut } from 'lucide-react';
+import { Upload, Image as ImageIcon, CheckCircle, AlertCircle, Trash2, X, BarChart3, Camera, Users, LogOut, MessageCircle } from 'lucide-react';
 import { supabase } from '../supabase';
 import './Admin.css';
 
@@ -159,10 +159,28 @@ const Admin = () => {
                         <p className="nav-subtitle">We Remain - Photo Management</p>
                     </div>
                 </div>
-                <button onClick={handleLogout} className="logout-btn">
-                    <LogOut size={18} />
-                    Keluar
-                </button>
+                <div className="nav-right" style={{ display: 'flex', gap: '1rem' }}>
+                    <button onClick={() => navigate('/chat')} className="chat-nav-btn" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.5rem 1rem',
+                        border: 'none',
+                        borderRadius: '20px',
+                        backgroundColor: 'var(--accent-light)',
+                        color: 'var(--accent)',
+                        cursor: 'pointer',
+                        fontWeight: '500',
+                        fontFamily: 'var(--font-sans)'
+                    }}>
+                        <MessageCircle size={18} />
+                        Chat
+                    </button>
+                    <button onClick={handleLogout} className="logout-btn">
+                        <LogOut size={18} />
+                        Keluar
+                    </button>
+                </div>
             </nav>
 
             <main className="admin-content">
