@@ -48,10 +48,10 @@ const Highlight = () => {
                             <motion.div
                                 key={img.id}
                                 className={`highlight-card ${index % 2 === 0 ? 'left' : 'right'}`}
-                                initial={{ opacity: 0, y: 50 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-100px" }}
-                                transition={{ duration: 1.5, ease: "easeOut" }}
+                                initial={{ opacity: 0, x: index % 2 === 0 ? -100 : 100 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: false, amount: 0.2 }}
+                                transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
                             >
                                 <div className="highlight-image-container">
                                     <img src={img.url} alt="Meeting Moment" />
