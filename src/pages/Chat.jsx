@@ -21,12 +21,28 @@ const Chat = () => {
 
         fetchMessages();
 
+        // Request notification permission
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
         // Subscribe to real-time changes
         const subscription = supabase
             .channel('public:messages')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-                setMessages((prev) => [...prev, payload.new]);
+                const newMessage = payload.new;
+                setMessages((prev) => [...prev, newMessage]);
                 scrollToBottom();
+
+                // Notification logic
+                if (newMessage.sender !== identity && document.visibilityState === 'hidden') {
+                    if (Notification.permission === 'granted') {
+                        new Notification(`Pesan baru dari ${newMessage.sender}`, {
+                            body: newMessage.content,
+                            icon: '/src/assets/heart-cursor.svg' // Revert to using the heart icon for notification
+                        });
+                    }
+                }
             })
             .subscribe();
 

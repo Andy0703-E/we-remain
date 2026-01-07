@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import LoadingScreen from './components/LoadingScreen'
+import BackgroundMusic from './components/BackgroundMusic'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
@@ -24,6 +25,8 @@ function App() {
       <AnimatePresence mode="wait">
         {loading && <LoadingScreen key="loading" />}
       </AnimatePresence>
+
+      <BackgroundMusic />
 
       {!loading && (
         <div className="app">
