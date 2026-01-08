@@ -303,9 +303,14 @@ const Chat = () => {
             await pc.setLocalDescription(offer);
 
             sendSignal('offer', offer, targetUser);
+            sendSignal('offer', offer, targetUser);
         } catch (err) {
             console.error("Error starting call:", err);
-            alert("Gagal memulai panggilan video.");
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                alert("Izin kamera ditolak. Mohon aktifkan izin kamera di pengaturan browser Anda.");
+            } else {
+                alert("Gagal memulai panggilan video: " + err.message);
+            }
             setCallStatus('idle');
         }
     };
@@ -357,6 +362,11 @@ const Chat = () => {
             }
         } catch (err) {
             console.error("Error accepting call:", err);
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                alert("Gagal menerima panggilan: Izin kamera ditolak. Cek pengaturan browser.");
+            } else {
+                alert("Gagal menerima panggilan video");
+            }
             endCall();
         }
     };
