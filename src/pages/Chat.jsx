@@ -632,6 +632,10 @@ const Chat = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
+                        <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10, color: 'white', background: 'rgba(0,0,0,0.5)', padding: '5px 10px', borderRadius: '5px' }}>
+                            Status: {connectionStatus} <br />
+                            <small>{VERSION}</small>
+                        </div>
                         <div className="remote-video-container">
                             <video ref={remoteVideoRef} autoPlay playsInline controls className="remote-video" />
                         </div>
