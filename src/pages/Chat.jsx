@@ -36,6 +36,7 @@ const Chat = () => {
     const peerConnectionRef = useRef(null);
     const localVideoRef = useRef(null);
     const remoteVideoRef = useRef(null);
+    const candidateQueueRef = useRef([]); // Buffer for ICE candidates
 
     const rtcConfig = {
         iceServers: [
@@ -87,7 +88,7 @@ const Chat = () => {
         return () => {
             supabase.removeChannel(subscription);
         };
-    }, [navigate]);
+    }, [navigate, identity]);
 
     useEffect(() => {
         scrollToBottom();
@@ -207,15 +208,28 @@ const Chat = () => {
             case 'answer':
                 if (peerConnectionRef.current) {
                     await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
+                    setCallStatus('connected'); // Fix: Transition to connected state for caller
+
+                    // Process buffered candidates (Caller side)
+                    while (candidateQueueRef.current.length > 0) {
+                        const candidate = candidateQueueRef.current.shift();
+                        try {
+                            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+                        } catch (e) {
+                            console.error('Error adding buffered ice candidate (caller)', e);
+                        }
+                    }
                 }
                 break;
             case 'ice-candidate':
-                if (peerConnectionRef.current) {
+                if (peerConnectionRef.current && peerConnectionRef.current.remoteDescription) {
                     try {
                         await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data));
                     } catch (e) {
                         console.error('Error adding received ice candidate', e);
                     }
+                } else {
+                    candidateQueueRef.current.push(data);
                 }
                 break;
             case 'end-call':
@@ -289,6 +303,16 @@ const Chat = () => {
             await pc.setLocalDescription(answer);
 
             sendSignal('answer', answer, incomingCall.from);
+
+            // Process buffered candidates
+            while (candidateQueueRef.current.length > 0) {
+                const candidate = candidateQueueRef.current.shift();
+                try {
+                    await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                } catch (e) {
+                    console.error('Error adding buffered ice candidate', e);
+                }
+            }
         } catch (err) {
             console.error("Error accepting call:", err);
             endCall();
@@ -312,6 +336,7 @@ const Chat = () => {
         setRemoteStream(null);
         setCallStatus('idle');
         setIncomingCall(null);
+        candidateQueueRef.current = [];
         setIsMuted(false);
         setIsVideoOff(false);
     };
