@@ -21,6 +21,7 @@ const Chat = () => {
 
     // Video Call State
     const [callStatus, setCallStatus] = useState('idle'); // idle, calling, receiving, connected
+    const [connectionStatus, setConnectionStatus] = useState('Init'); // New state for ICE status
     const [incomingCall, setIncomingCall] = useState(null);
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
@@ -288,7 +289,13 @@ const Chat = () => {
                 }
             };
 
+            pc.oniceconnectionstatechange = () => {
+                console.log("ICE Connection State:", pc.iceConnectionState); // DEBUG
+                setConnectionStatus(pc.iceConnectionState);
+            };
+
             pc.ontrack = (event) => {
+                console.log("Track received:", event.streams[0]); // DEBUG
                 setRemoteStream(event.streams[0]);
             };
 
@@ -322,7 +329,13 @@ const Chat = () => {
                 }
             };
 
+            pc.oniceconnectionstatechange = () => {
+                console.log("ICE Connection State:", pc.iceConnectionState); // DEBUG
+                setConnectionStatus(pc.iceConnectionState);
+            };
+
             pc.ontrack = (event) => {
+                console.log("Track received:", event.streams[0]); // DEBUG
                 setRemoteStream(event.streams[0]);
             };
 
@@ -478,7 +491,10 @@ const Chat = () => {
                 </button>
                 <div className="header-info">
                     <h2 className="serif">Ruang Berdua</h2>
-                    <p className="status">Online <span style={{ fontSize: '10px', opacity: 0.5 }}>{VERSION}</span></p>
+                    <p className="status">
+                        {callStatus === 'connected' ? `Connected (${connectionStatus})` : 'Online'}
+                        <span style={{ fontSize: '10px', opacity: 0.5 }}> {VERSION}</span>
+                    </p>
                 </div>
                 <button
                     className="video-call-btn"
