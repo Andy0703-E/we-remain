@@ -37,6 +37,7 @@ const Chat = () => {
     const localVideoRef = useRef(null);
     const remoteVideoRef = useRef(null);
     const candidateQueueRef = useRef([]); // Buffer for ICE candidates
+    const channelRef = useRef(null); // Persistent Supabase channel
 
     const rtcConfig = {
         iceServers: [
@@ -44,6 +45,9 @@ const Chat = () => {
             { urls: 'stun:stun1.l.google.com:19302' }
         ]
     };
+
+    // DEBUG: Version indicator
+    const VERSION = "v1.2 (Debug)";
 
     useEffect(() => {
         // Protect route
@@ -60,8 +64,10 @@ const Chat = () => {
         }
 
         // Subscribe to real-time changes
-        const subscription = supabase
-            .channel('public:messages')
+        const channel = supabase.channel('public:messages');
+        channelRef.current = channel;
+
+        channel
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
                 const newMessage = payload.new;
                 setMessages((prev) => [...prev, newMessage]);
@@ -79,14 +85,22 @@ const Chat = () => {
             })
             // Signaling for Video Call
             .on('broadcast', { event: 'call-signal' }, ({ payload }) => {
+                console.log("Received Signal:", payload.type, "From:", payload.from, "Target:", payload.target, "My Identity:", identity); // DEBUG
                 if (payload.target === identity && payload.from !== identity) {
                     handleSignalingData(payload);
                 }
             })
-            .subscribe();
+            .subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log('Connected to real-time channel');
+                }
+            });
 
         return () => {
-            supabase.removeChannel(subscription);
+            if (channelRef.current) {
+                supabase.removeChannel(channelRef.current);
+                channelRef.current = null;
+            }
         };
     }, [navigate, identity]);
 
@@ -190,7 +204,12 @@ const Chat = () => {
 
     // --- Video Call Logic ---
     const sendSignal = async (type, data, targetUser) => {
-        await supabase.channel('public:messages').send({
+        if (!channelRef.current) {
+            console.error("No active channel to send signal");
+            return;
+        }
+
+        await channelRef.current.send({
             type: 'broadcast',
             event: 'call-signal',
             payload: { type, data, from: identity, target: targetUser }
@@ -199,25 +218,35 @@ const Chat = () => {
 
     const handleSignalingData = async (payload) => {
         const { type, data, from } = payload;
+        console.log("Processing Signal:", type); // DEBUG
 
         switch (type) {
             case 'offer':
+                if (callStatus === 'calling' || callStatus === 'connected') return; // Busy
                 setIncomingCall({ from, offer: data });
                 setCallStatus('receiving');
                 break;
             case 'answer':
+                console.log("Received ANSWER. PC:", !!peerConnectionRef.current); // DEBUG
                 if (peerConnectionRef.current) {
-                    await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
-                    setCallStatus('connected'); // Fix: Transition to connected state for caller
+                    try {
+                        await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
+                        console.log("Remote Description Set. Transitioning to CONNECTED."); // DEBUG
+                        setCallStatus('connected'); // Fix: Transition to connected state for caller
 
-                    // Process buffered candidates (Caller side)
-                    while (candidateQueueRef.current.length > 0) {
-                        const candidate = candidateQueueRef.current.shift();
-                        try {
-                            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-                        } catch (e) {
-                            console.error('Error adding buffered ice candidate (caller)', e);
+                        // Process buffered candidates (Caller side)
+                        console.log("Processing Buffered Candidates (Caller):", candidateQueueRef.current.length); // DEBUG
+                        while (candidateQueueRef.current.length > 0) {
+                            const candidate = candidateQueueRef.current.shift();
+                            try {
+                                await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+                            } catch (e) {
+                                console.error('Error adding buffered ice candidate (caller)', e);
+                            }
                         }
+                    } catch (e) {
+                        console.error("Error handling ANSWER:", e);
+                        alert("Error connecting: " + e.message);
                     }
                 }
                 break;
@@ -449,7 +478,7 @@ const Chat = () => {
                 </button>
                 <div className="header-info">
                     <h2 className="serif">Ruang Berdua</h2>
-                    <p className="status">Online</p>
+                    <p className="status">Online <span style={{ fontSize: '10px', opacity: 0.5 }}>{VERSION}</span></p>
                 </div>
                 <button
                     className="video-call-btn"
@@ -588,7 +617,7 @@ const Chat = () => {
                         exit={{ opacity: 0 }}
                     >
                         <div className="remote-video-container">
-                            <video ref={remoteVideoRef} autoPlay playsInline className="remote-video" />
+                            <video ref={remoteVideoRef} autoPlay playsInline controls className="remote-video" />
                         </div>
                         <div className="local-video-container">
                             <video ref={localVideoRef} autoPlay playsInline muted className="local-video" />
