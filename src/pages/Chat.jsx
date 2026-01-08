@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowLeft, User, Heart, Image as ImageIcon, X, Camera, RefreshCw, Video, Phone, Mic, MicOff, VideoOff, PhoneOff } from 'lucide-react';
+import { Send, ArrowLeft, User, Heart, Image as ImageIcon, X, Camera, RefreshCw } from 'lucide-react';
 
 import { supabase } from '../supabase';
 import './Chat.css';
@@ -19,36 +19,38 @@ const Chat = () => {
     const [isCameraOpen, setIsCameraOpen] = useState(false);
     const [facingMode, setFacingMode] = useState('user');
 
-    // Video Call State
-    const [callStatus, setCallStatus] = useState('idle'); // idle, calling, receiving, connected
-    const [connectionStatus, setConnectionStatus] = useState('Init'); // New state for ICE status
-    const [incomingCall, setIncomingCall] = useState(null);
-    const [localStream, setLocalStream] = useState(null);
-    const [remoteStream, setRemoteStream] = useState(null);
-    const [isMuted, setIsMuted] = useState(false);
-    const [isVideoOff, setIsVideoOff] = useState(false);
+    // Camera State
+    const [isCameraOpen, setIsCameraOpen] = useState(false);
+    const [facingMode, setFacingMode] = useState('user');
 
     const fileInputRef = useRef(null);
     const messagesEndRef = useRef(null);
     const videoRef = useRef(null);
     const cameraStreamRef = useRef(null);
 
-    // WebRTC Refs
-    const peerConnectionRef = useRef(null);
-    const localVideoRef = useRef(null);
-    const remoteVideoRef = useRef(null);
-    const candidateQueueRef = useRef([]); // Buffer for ICE candidates
-    const channelRef = useRef(null); // Persistent Supabase channel
+    // Stream Ref for Camera (fix missing ref usage in previous code if any, checking...)
+    // Actually in the original code 'streamRef' was used but not declared? 
+    // Wait, let me check the file content again.
+    // Line 135: streamRef.current = stream; 
+    // But streamRef was NOT declared in the snippets I saw!
+    // Ah, lines 30-41 in previous `view_file` (Step 270):
+    // 33: const videoRef = useRef(null);
+    // 34: const cameraStreamRef = useRef(null);
+    // 36: // WebRTC Refs ... 
+    // 
+    // In startCamera (Line 145):
+    // 151: streamRef.current = stream; 
+    // Wait, looking at file content Step 270:
+    // Line 135 (in startCamera logic, effectively line 151): streamRef.current = stream;
+    // BUT 'streamRef' is NOT defined in lines 9-41. 
+    // 'cameraStreamRef' is defined at line 34.
+    // This implies there was a bug in the photo feature too? Or did I miss it?
+    // Let's check line 34: const cameraStreamRef = useRef(null);
+    // Let's check line 151: streamRef.current = stream;
+    // YES! 'streamRef' is undefined. It should be 'cameraStreamRef'.
+    // I will fix this BUG while I am at it to ensure photo works.
 
-    const rtcConfig = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
-        ]
-    };
-
-    // DEBUG: Version indicator
-    const VERSION = "v1.2 (Debug)";
+    // So replacement for lines 22-51 (removing video call states/refs/config):
 
     useEffect(() => {
         // Protect route
@@ -65,10 +67,9 @@ const Chat = () => {
         }
 
         // Subscribe to real-time changes
-        const channel = supabase.channel('public:messages');
-        channelRef.current = channel;
-
-        channel
+        // Subscribe to real-time changes
+        const subscription = supabase
+            .channel('public:messages')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
                 const newMessage = payload.new;
                 setMessages((prev) => [...prev, newMessage]);
@@ -84,24 +85,10 @@ const Chat = () => {
                     }
                 }
             })
-            // Signaling for Video Call
-            .on('broadcast', { event: 'call-signal' }, ({ payload }) => {
-                console.log("Received Signal:", payload.type, "From:", payload.from, "Target:", payload.target, "My Identity:", identity); // DEBUG
-                if (payload.target === identity && payload.from !== identity) {
-                    handleSignalingData(payload);
-                }
-            })
-            .subscribe((status) => {
-                if (status === 'SUBSCRIBED') {
-                    console.log('Connected to real-time channel');
-                }
-            });
+            .subscribe();
 
         return () => {
-            if (channelRef.current) {
-                supabase.removeChannel(channelRef.current);
-                channelRef.current = null;
-            }
+            supabase.removeChannel(subscription);
         };
     }, [navigate, identity]);
 
@@ -148,7 +135,7 @@ const Chat = () => {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: facingMode }
             });
-            streamRef.current = stream;
+            cameraStreamRef.current = stream; // Fixed: was streamRef
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
             }
@@ -160,25 +147,23 @@ const Chat = () => {
     };
 
     const stopCamera = () => {
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
-            streamRef.current = null;
+        if (cameraStreamRef.current) { // Fixed: was streamRef
+            cameraStreamRef.current.getTracks().forEach(track => track.stop());
+            cameraStreamRef.current = null;
         }
         setIsCameraOpen(false);
     };
 
     const switchCamera = () => {
         setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
-        // Effect will re-trigger stream update if we add facingMode dependency or restart manually
-        // For simplicity, let's stop and restart
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
+        if (cameraStreamRef.current) { // Fixed
+            cameraStreamRef.current.getTracks().forEach(track => track.stop());
         }
         setTimeout(() => {
             navigator.mediaDevices.getUserMedia({
                 video: { facingMode: facingMode === 'user' ? 'environment' : 'user' }
             }).then(stream => {
-                streamRef.current = stream;
+                cameraStreamRef.current = stream; // Fixed
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
                 }
@@ -203,221 +188,11 @@ const Chat = () => {
         }
     };
 
-    // --- Video Call Logic ---
-    const sendSignal = async (type, data, targetUser) => {
-        if (!channelRef.current) {
-            console.error("No active channel to send signal");
-            return;
-        }
+    // --- Video Call Logic Removed ---
 
-        await channelRef.current.send({
-            type: 'broadcast',
-            event: 'call-signal',
-            payload: { type, data, from: identity, target: targetUser }
-        });
-    };
 
-    const handleSignalingData = async (payload) => {
-        const { type, data, from } = payload;
-        console.log("Processing Signal:", type); // DEBUG
 
-        switch (type) {
-            case 'offer':
-                if (callStatus === 'calling' || callStatus === 'connected') return; // Busy
-                setIncomingCall({ from, offer: data });
-                setCallStatus('receiving');
-                break;
-            case 'answer':
-                console.log("Received ANSWER. PC:", !!peerConnectionRef.current); // DEBUG
-                if (peerConnectionRef.current) {
-                    try {
-                        await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data));
-                        console.log("Remote Description Set. Transitioning to CONNECTED."); // DEBUG
-                        setCallStatus('connected'); // Fix: Transition to connected state for caller
 
-                        // Process buffered candidates (Caller side)
-                        console.log("Processing Buffered Candidates (Caller):", candidateQueueRef.current.length); // DEBUG
-                        while (candidateQueueRef.current.length > 0) {
-                            const candidate = candidateQueueRef.current.shift();
-                            try {
-                                await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-                            } catch (e) {
-                                console.error('Error adding buffered ice candidate (caller)', e);
-                            }
-                        }
-                    } catch (e) {
-                        console.error("Error handling ANSWER:", e);
-                        alert("Error connecting: " + e.message);
-                    }
-                }
-                break;
-            case 'ice-candidate':
-                if (peerConnectionRef.current && peerConnectionRef.current.remoteDescription) {
-                    try {
-                        await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data));
-                    } catch (e) {
-                        console.error('Error adding received ice candidate', e);
-                    }
-                } else {
-                    candidateQueueRef.current.push(data);
-                }
-                break;
-            case 'end-call':
-                endCall(false);
-                break;
-            default:
-                break;
-        }
-    };
-
-    const startCall = async () => {
-        const targetUser = identity === 'Agung' ? 'Esthy' : 'Agung';
-        setCallStatus('calling');
-
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            setLocalStream(stream);
-
-            const pc = new RTCPeerConnection(rtcConfig);
-            peerConnectionRef.current = pc;
-
-            stream.getTracks().forEach(track => pc.addTrack(track, stream));
-
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    sendSignal('ice-candidate', event.candidate, targetUser);
-                }
-            };
-
-            pc.oniceconnectionstatechange = () => {
-                console.log("ICE Connection State:", pc.iceConnectionState); // DEBUG
-                setConnectionStatus(pc.iceConnectionState);
-            };
-
-            pc.ontrack = (event) => {
-                console.log("Track received:", event.streams[0]); // DEBUG
-                setRemoteStream(event.streams[0]);
-            };
-
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-
-            sendSignal('offer', offer, targetUser);
-            sendSignal('offer', offer, targetUser);
-        } catch (err) {
-            console.error("Error starting call:", err);
-            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                alert("Izin kamera ditolak. Mohon aktifkan izin kamera di pengaturan browser Anda.");
-            } else {
-                alert("Gagal memulai panggilan video: " + err.message);
-            }
-            setCallStatus('idle');
-        }
-    };
-
-    const acceptCall = async () => {
-        if (!incomingCall) return;
-        setCallStatus('connected');
-
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            setLocalStream(stream);
-
-            const pc = new RTCPeerConnection(rtcConfig);
-            peerConnectionRef.current = pc;
-
-            stream.getTracks().forEach(track => pc.addTrack(track, stream));
-
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    sendSignal('ice-candidate', event.candidate, incomingCall.from);
-                }
-            };
-
-            pc.oniceconnectionstatechange = () => {
-                console.log("ICE Connection State:", pc.iceConnectionState); // DEBUG
-                setConnectionStatus(pc.iceConnectionState);
-            };
-
-            pc.ontrack = (event) => {
-                console.log("Track received:", event.streams[0]); // DEBUG
-                setRemoteStream(event.streams[0]);
-            };
-
-            await pc.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
-
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-
-            sendSignal('answer', answer, incomingCall.from);
-
-            // Process buffered candidates
-            while (candidateQueueRef.current.length > 0) {
-                const candidate = candidateQueueRef.current.shift();
-                try {
-                    await pc.addIceCandidate(new RTCIceCandidate(candidate));
-                } catch (e) {
-                    console.error('Error adding buffered ice candidate', e);
-                }
-            }
-        } catch (err) {
-            console.error("Error accepting call:", err);
-            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                alert("Gagal menerima panggilan: Izin kamera ditolak. Cek pengaturan browser.");
-            } else {
-                alert("Gagal menerima panggilan video");
-            }
-            endCall();
-        }
-    };
-
-    const endCall = (signal = true) => {
-        if (signal && (callStatus === 'connected' || callStatus === 'calling' || callStatus === 'receiving')) {
-            const target = incomingCall ? incomingCall.from : (identity === 'Agung' ? 'Esthy' : 'Agung');
-            sendSignal('end-call', null, target);
-        }
-
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-            setLocalStream(null);
-        }
-        if (peerConnectionRef.current) {
-            peerConnectionRef.current.close();
-            peerConnectionRef.current = null;
-        }
-        setRemoteStream(null);
-        setCallStatus('idle');
-        setIncomingCall(null);
-        candidateQueueRef.current = [];
-        setIsMuted(false);
-        setIsVideoOff(false);
-    };
-
-    const toggleAudio = () => {
-        if (localStream) {
-            localStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
-            setIsMuted(!isMuted);
-        }
-    };
-
-    const toggleVideo = () => {
-        if (localStream) {
-            localStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
-            setIsVideoOff(!isVideoOff);
-        }
-    };
-
-    useEffect(() => {
-        if (localVideoRef.current && localStream) {
-            localVideoRef.current.srcObject = localStream;
-        }
-    }, [localStream, callStatus]);
-
-    useEffect(() => {
-        if (remoteVideoRef.current && remoteStream) {
-            remoteVideoRef.current.srcObject = remoteStream;
-        }
-    }, [remoteStream, callStatus]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -501,19 +276,9 @@ const Chat = () => {
                 </button>
                 <div className="header-info">
                     <h2 className="serif">Ruang Berdua</h2>
-                    <p className="status">
-                        {callStatus === 'connected' ? `Connected (${connectionStatus})` : 'Online'}
-                        <span style={{ fontSize: '10px', opacity: 0.5 }}> {VERSION}</span>
-                    </p>
+                    <p className="status">Online</p>
                 </div>
-                <button
-                    className="video-call-btn"
-                    onClick={startCall}
-                    disabled={callStatus !== 'idle'}
-                    style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)' }}
-                >
-                    <Video size={24} />
-                </button>
+
             </header>
 
             <div className="messages-container">
@@ -610,80 +375,7 @@ const Chat = () => {
                     </motion.div>
                 )}
 
-                {/* Incoming Call Modal */}
-                {callStatus === 'receiving' && incomingCall && (
-                    <motion.div
-                        className="call-modal incoming"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                    >
-                        <div className="call-avatar">
-                            <User size={64} />
-                        </div>
-                        <h3>Masuk Panggilan Video...</h3>
-                        <p>{incomingCall.from}</p>
-                        <div className="call-actions">
-                            <button onClick={() => endCall(true)} className="call-btn reject">
-                                <PhoneOff size={24} />
-                            </button>
-                            <button onClick={acceptCall} className="call-btn accept">
-                                <Phone size={24} />
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
 
-                {/* Active Call Modal */}
-                {callStatus === 'connected' && (
-                    <motion.div
-                        className="call-modal active"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10, color: 'white', background: 'rgba(0,0,0,0.5)', padding: '5px 10px', borderRadius: '5px' }}>
-                            Status: {connectionStatus} <br />
-                            <small>{VERSION}</small>
-                        </div>
-                        <div className="remote-video-container">
-                            <video ref={remoteVideoRef} autoPlay playsInline controls className="remote-video" />
-                        </div>
-                        <div className="local-video-container">
-                            <video ref={localVideoRef} autoPlay playsInline muted className="local-video" />
-                        </div>
-
-                        <div className="call-controls">
-                            <button onClick={toggleAudio} className={`control-btn ${isMuted ? 'off' : ''}`}>
-                                {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
-                            </button>
-                            <button onClick={() => endCall(true)} className="control-btn end">
-                                <PhoneOff size={24} />
-                            </button>
-                            <button onClick={toggleVideo} className={`control-btn ${isVideoOff ? 'off' : ''}`}>
-                                {isVideoOff ? <VideoOff size={24} /> : <Video size={24} />}
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
-
-                {/* Calling State */}
-                {callStatus === 'calling' && (
-                    <motion.div
-                        className="call-modal calling"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        <div className="call-avatar pulsing">
-                            <User size={64} />
-                        </div>
-                        <h3>Memanggil...</h3>
-                        <button onClick={() => endCall(true)} className="call-btn reject">
-                            <PhoneOff size={24} />
-                        </button>
-                    </motion.div>
-                )}
             </AnimatePresence>
         </div>
     );
