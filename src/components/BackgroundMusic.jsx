@@ -58,15 +58,23 @@ const BackgroundMusic = () => {
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            bottom: '20px',
-            left: '20px',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start'
-        }}>
+        <motion.div
+            drag
+            dragMomentum={false}
+            whileDrag={{ scale: 1.1, cursor: 'grabbing' }}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+                position: 'fixed',
+                bottom: '20px',
+                left: '20px',
+                zIndex: 9999,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                cursor: 'grab'
+            }}
+        >
             <audio ref={audioRef} src={musicFile} loop />
 
             <AnimatePresence mode="wait">
@@ -134,7 +142,7 @@ const BackgroundMusic = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </motion.div>
     );
 };
 

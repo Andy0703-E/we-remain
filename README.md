@@ -8,6 +8,10 @@ Website ini adalah ruang bersama personal untuk mendokumentasikan perjalanan seb
 - **Opening Section**: Narasi emosional tentang jarak dan pilihan.
 - **Galeri "Potret dalam Diam"**: Kumpulan foto studio dengan caption permanen.
 - **Highlight Section**: Dokumentasi momen-momen saat benar-benar bertemu.
+- **Ruang Berdua (Chat)**: Fitur pesan eksklusif dengan kemampuan:
+    - **Kirim Foto**: Upload foto dari galeri.
+    - **Kamera Langsung**: Ambil foto selfie langsung dari chat.
+    - **Video Call**: Panggilan tatap muka real-time dengan fitur mute & toggle camera.
 - **Private Upload System**: Sistem login khusus (password: `07032022`) untuk menambah kenangan baru kapan saja.
 
 ## Teknologi

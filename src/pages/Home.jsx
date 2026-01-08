@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Hero from '../components/Hero';
 import Gallery from '../components/Gallery';
-import Highlight from '../components/Highlight';
+
 import Footer from '../components/Footer';
 
 const Home = () => {
@@ -14,7 +14,7 @@ const Home = () => {
         >
             <Hero />
             <Gallery />
-            <Highlight />
+
             <Footer />
         </motion.main>
     );

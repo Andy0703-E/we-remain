@@ -177,3 +177,330 @@
     color: var(--accent);
     transform: translateY(-5px);
 }
+
+.message-input-area {
+    position: relative;
+    /* For absolute positioning of preview */
+    z-index: 20;
+}
+
+.attach-btn {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-secondary) !important;
+}
+
+.attach-btn:hover {
+    background-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.image-preview-container {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    padding: 10px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideUp 0.3s ease;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.image-preview-container img {
+    height: 80px;
+    width: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    object-fit: cover;
+}
+
+.cancel-image-btn {
+    width: 30px !important;
+    height: 30px !important;
+    background-color: #ff4d4f !important;
+    color: white !important;
+}
+
+.message-image {
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.message-image img {
+    max-width: 100%;
+    max-height: 250px;
+    display: block;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+
+.message-image img:hover {
+    transform: scale(1.02);
+}
+
+/* Camera Modal */
+.camera-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.camera-view {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.camera-view video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.camera-controls {
+    position: absolute;
+    bottom: 2rem;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.camera-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+}
+
+.camera-btn.capture {
+    width: 70px;
+    height: 70px;
+    border: 4px solid white;
+    background: transparent;
+    padding: 2px;
+}
+
+.capture-inner {
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.1s;
+}
+
+.camera-btn.capture:active .capture-inner {
+    transform: scale(0.9);
+}
+
+.camera-btn:hover:not(.capture) {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+
+/* Video Call Styles */
+.call-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.call-modal.incoming,
+.call-modal.calling {
+    background: linear-gradient(135deg, #2a2a72 0%, #009ffd 100%);
+    color: white;
+}
+
+.call-avatar {
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+}
+
+.call-avatar.pulsing {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+    }
+
+    70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 20px rgba(255, 255, 255, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
+.call-modal h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.call-actions {
+    display: flex;
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.call-btn {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.call-btn:hover {
+    transform: scale(1.1);
+}
+
+.call-btn.accept {
+    background: #4cd137;
+    color: white;
+}
+
+.call-btn.reject {
+    background: #e84118;
+    color: white;
+}
+
+/* Active Call Layout */
+.remote-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.remote-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.local-video-container {
+    position: absolute;
+    bottom: 120px;
+    right: 20px;
+    width: 100px;
+    /* Default small size */
+    height: 150px;
+    background: #333;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.local-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    /* Mirror effect */
+}
+
+.call-controls {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 1.5rem;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+}
+
+.control-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.control-btn.off {
+    background: white;
+    color: #333;
+}
+
+.control-btn.end {
+    background: #e84118;
+    width: 60px;
+    height: 60px;
+}
